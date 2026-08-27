@@ -1,5 +1,7 @@
 package com.asistencia;
 
+import javax.swing.SwingUtilities;
+
 import com.asistencia.dao.AsistenciaDAO;
 import com.asistencia.dao.UsuarioDAO;
 import com.asistencia.database.DatabaseConnection;
@@ -9,9 +11,7 @@ import com.asistencia.service.AuthService;
 import com.asistencia.service.ReporteService;
 import com.asistencia.service.UsuarioService;
 import com.asistencia.ui.LoginFrame;
-
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
+import com.formdev.flatlaf.FlatLightLaf;
 
 public class Main {
     public static void main(String[] args) {
@@ -29,7 +29,7 @@ public class Main {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                FlatLightLaf.setup();
             } catch (Exception ignored) {
                 // Swing can continue with its default look and feel.
             }
