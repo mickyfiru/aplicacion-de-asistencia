@@ -1,7 +1,7 @@
 package com.asistencia.ui;
 
-import com.asistencia.model.Rol;
-import com.asistencia.model.Usuario;
+import java.awt.Color;
+import java.awt.GridLayout;
 
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -10,7 +10,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import java.awt.GridLayout;
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+
+import com.asistencia.model.Rol;
+import com.asistencia.model.Usuario;
 
 public class UserDialog extends JDialog {
     private final JTextField nombreField = new JTextField();
@@ -27,14 +31,39 @@ public class UserDialog extends JDialog {
     }
 
     private void buildContent(Usuario usuario) {
-        JPanel form = new JPanel(new GridLayout(4, 2, 8, 8));
-        form.add(new JLabel("Nombre"));
+        JPanel form = new JPanel(new GridLayout(4, 2, 15, 15));
+        form.setBackground(Color.decode("#2C3E50")); 
+        form.setBorder(new EmptyBorder(20, 20, 10, 20));
+
+        //placerholders
+        nombreField.putClientProperty("JTextField.placeholderText", "Ej. Juan Perez");
+        nombreField.putClientProperty("JTextField.showClearButton", true);
+
+        correoField.putClientProperty("JTextField.placeholderText", "ejemplo@empresa.cl");
+        correoField.putClientProperty("JTextField.showClearButton", true);
+        
+        passwordField.putClientProperty("JTextField.placeholderText", "********");
+        passwordField.putClientProperty("JTextField.showToggleButton", true); 
+
+
+        JLabel lblNombre = new JLabel("Nombre:");
+        lblNombre.setForeground(Color.WHITE);
+        form.add(lblNombre);
         form.add(nombreField);
-        form.add(new JLabel("Correo"));
+
+        JLabel lblCorreo = new JLabel("Correo electrónico:");
+        lblCorreo.setForeground(Color.WHITE);
+        form.add(lblCorreo);
         form.add(correoField);
-        form.add(new JLabel("Contrasena"));
+
+        JLabel lblPass = new JLabel("Contraseña:");
+        lblPass.setForeground(Color.WHITE);
+        form.add(lblPass);
         form.add(passwordField);
-        form.add(new JLabel("Rol"));
+
+        JLabel lblRol = new JLabel("Rol del sistema:");
+        lblRol.setForeground(Color.WHITE);
+        form.add(lblRol);
         form.add(rolCombo);
 
         if (usuario != null) {
@@ -43,14 +72,37 @@ public class UserDialog extends JDialog {
             rolCombo.setSelectedItem(usuario.getRol());
         }
 
-        int result = JOptionPane.showConfirmDialog(
+        // Modificaciones al JOptionPane
+        Object oldColor = UIManager.get("Panel.background");
+        Object oldOptionBg = UIManager.get("OptionPane.background"); 
+        Object oldMessageFg = UIManager.get("OptionPane.messageForeground");
+        Object oldButtonFg = UIManager.get("Button.foreground");
+        
+        UIManager.put("OptionPane.background", Color.decode("#2C3E50"));
+        UIManager.put("Panel.background", Color.decode("#2C3E50"));
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
+        UIManager.put("Button.foreground", Color.WHITE);
+
+        Object[] opcionesDeBotones = {"Guardar", "Cancelar"};
+
+        int result = JOptionPane.showOptionDialog(
                 this,
                 form,
                 getTitle(),
                 JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.PLAIN_MESSAGE
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                opcionesDeBotones, 
+                opcionesDeBotones[0] 
         );
-        accepted = result == JOptionPane.OK_OPTION;
+        
+        // Restauración
+        UIManager.put("Panel.background", oldColor);
+        UIManager.put("OptionPane.background", oldOptionBg); 
+        UIManager.put("OptionPane.messageForeground", oldMessageFg);
+        UIManager.put("Button.foreground", oldButtonFg);
+        
+        accepted = result == 0;
     }
 
     public boolean isAccepted() {
