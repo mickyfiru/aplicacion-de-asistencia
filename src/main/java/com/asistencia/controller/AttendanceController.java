@@ -3,12 +3,14 @@ package com.asistencia.controller;
 import com.asistencia.model.AttendanceCorrectionRequest;
 import com.asistencia.model.AttendanceFilter;
 import com.asistencia.model.AttendanceRecord;
+import com.asistencia.model.AbsenceReportItem;
 import com.asistencia.model.EarlyDepartureReportItem;
 import com.asistencia.model.LateArrivalReportItem;
 import com.asistencia.model.Usuario;
 import com.asistencia.model.WorkerReference;
 import com.asistencia.service.AttendanceService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class AttendanceController {
@@ -32,6 +34,10 @@ public class AttendanceController {
 
     public List<EarlyDepartureReportItem> getEarlyDepartures(AttendanceFilter filter) {
         return attendanceService.findEarlyDepartures(filter);
+    }
+
+    public List<AbsenceReportItem> getAbsences(List<WorkerReference> workers, LocalDate date) {
+        return attendanceService.findAbsences(workers, date);
     }
 
     public AttendanceRecord correctRecord(AttendanceCorrectionRequest request, Usuario administrator) {
