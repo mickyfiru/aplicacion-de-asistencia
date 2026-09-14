@@ -81,6 +81,49 @@ mvn test
 
 Las pruebas usan bases SQLite temporales, por lo que no modifican `asistencia.db`.
 
+## Firebase Auth y Data Connect directo
+
+Para usar el flujo Firebase sin Cloud Run ni Cloud Functions, habilita `Email/Password` en Firebase Authentication y configura la Web API Key fuera del repositorio:
+
+```text
+FIREBASE_WEB_API_KEY=...
+```
+
+Tambien puedes crear el archivo local:
+
+```text
+%USERPROFILE%\.app-asistencia\firebase-auth.properties
+```
+
+con este contenido:
+
+```properties
+firebase.web.api.key=...
+```
+
+La aplicacion usa esa clave para iniciar sesion contra Firebase Authentication REST. La clave web no es una credencial administrativa, pero no debe escribirse hardcodeada en clases Java. Despues del login se mantiene en memoria `idToken`, `refreshToken`, `localId` y expiracion; al cerrar sesion se limpian los tokens.
+
+Para crear el primer usuario real:
+
+1. Crear el usuario en Firebase Authentication y copiar su UID.
+2. Crear el registro correspondiente en `usuarios` de PostgreSQL/Data Connect con `authUid = UID de Firebase`.
+
+No se crean usuarios automaticamente desde la pantalla de asistencia.
+
+## Limitacion de dia Chile
+
+`horaEntrada` y `horaSalida` se guardan con `request.time` de Data Connect. Esa es la autoridad temporal. El campo `fecha` se conserva por compatibilidad y no debe tratarse como autoridad del dia Chile, porque las fechas derivadas directamente de `request.time` se evaluan en UTC.
+
+Sin Cloud Run, Cloud Functions ni SQL personalizado adicional, la proteccion absoluta de "una entrada por dia America/Santiago" queda limitada. La defensa actual es:
+
+- Data Connect identifica al trabajador con `auth.uid`.
+- Data Connect no acepta `usuarioId`, `authUid`, `horaEntrada` ni `horaSalida` desde Swing.
+- Data Connect impide registrar salida si no hay una asistencia abierta.
+- Data Connect impide razonablemente una segunda entrada mientras exista una asistencia abierta.
+- La aplicacion bloquea en UI una segunda entrada para el dia Chile visible interpretando `horaEntrada` guardada por servidor.
+
+La restriccion fuerte por dia Chile deberia resolverse mas adelante con una regla PostgreSQL/SQL basada en `(hora_entrada AT TIME ZONE 'America/Santiago')::date`.
+
 ## Clases principales
 
 - `Main`: inicia la base de datos, servicios y ventana de login.

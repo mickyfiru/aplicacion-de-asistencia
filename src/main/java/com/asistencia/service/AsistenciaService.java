@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
-public class AsistenciaService {
+public class AsistenciaService implements WorkerAttendanceOperations {
     private final AsistenciaDAO asistenciaDAO;
     private final Clock clock;
 

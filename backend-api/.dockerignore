@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+target
+*.log
+*.env
+.env
+service-account*.json
+*serviceAccount*.json
+firebase-adminsdk*.json
+**/*secret*.json
+**/*credential*.json

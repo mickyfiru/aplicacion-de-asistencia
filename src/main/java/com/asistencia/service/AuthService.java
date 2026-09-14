@@ -7,7 +7,7 @@ import com.asistencia.util.ValidationUtil;
 
 import java.util.Optional;
 
-public class AuthService {
+public class AuthService implements LoginService {
     private final UsuarioDAO usuarioDAO;
 
     public AuthService(UsuarioDAO usuarioDAO) {

@@ -1,0 +1,53 @@
+type User @table(name: "usuarios", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  nombre: String!
+  apellido: String!
+  rut: String! @unique
+  correo: String! @unique
+  authUid: String! @unique
+  passwordHash: String!
+  rol: String!
+  activo: Boolean!
+  fechaCreacion: Timestamp! @default(expr: "request.time")
+}
+
+type Horario @table(name: "horarios", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  usuario: User!
+  diasSemana: [Int!]!
+  horaEntrada: String!
+  horaSalida: String!
+  activo: Boolean!
+}
+
+type Asistencia @table(
+  name: "asistencias",
+  key: ["usuario", "fecha"]
+) {
+  id: UUID! @default(expr: "uuidV4()") @unique
+  usuario: User!
+  fecha: Date! @default(expr: "request.time")
+  horaEntrada: Timestamp! @default(expr: "request.time")
+  estadoEntrada: String! @default(expr: "\"PENDIENTE\"")
+  minutosAtraso: Int! @default(expr: "0")
+  horaSalida: Timestamp
+  estadoSalida: String
+  minutosSalidaAnticipada: Int
+  observacion: String
+}
+
+type Inasistencia @table(name: "inasistencias", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  usuario: User!
+  fecha: Date!
+  justificada: Boolean!
+  motivo: String
+}
+
+type Auditoria @table(name: "auditoria", key: "id") {
+  id: UUID! @default(expr: "uuidV4()")
+  usuario: User!
+  accion: String!
+  origen: String!
+  fechaHora: Timestamp! @default(expr: "request.time")
+}

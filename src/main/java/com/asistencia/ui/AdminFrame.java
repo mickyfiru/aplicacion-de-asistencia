@@ -18,9 +18,15 @@ import com.asistencia.service.UsuarioService;
 
 public class AdminFrame extends JFrame {
     private final JFrame loginFrame;
+    private final Runnable logoutAction;
 
     public AdminFrame(Usuario usuario, UsuarioService usuarioService, ReporteService reporteService, JFrame loginFrame) {
+        this(usuario, usuarioService, reporteService, loginFrame, () -> {});
+    }
+
+    public AdminFrame(Usuario usuario, UsuarioService usuarioService, ReporteService reporteService, JFrame loginFrame, Runnable logoutAction) {
         this.loginFrame = loginFrame;
+        this.logoutAction = logoutAction;
         configureFrame();
         buildContent(usuario, usuarioService, reporteService);
     }
@@ -92,6 +98,7 @@ public class AdminFrame extends JFrame {
     }
 
     private void logout() {
+        logoutAction.run();
         dispose();
         loginFrame.setVisible(true);
     }

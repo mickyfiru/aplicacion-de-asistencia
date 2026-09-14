@@ -1,0 +1,13 @@
+specVersion: "v1beta"
+serviceId: "app-asistencia-5e6fe-service"
+location: "southamerica-west1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "app-asistencia-5e6fe-database"
+      cloudSql:
+        instanceId: "app-asistencia-5e6fe-instance"
+        schemaValidation: "COMPATIBLE"
+connectorDirs:
+  - "./default"

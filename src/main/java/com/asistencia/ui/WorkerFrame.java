@@ -1,7 +1,7 @@
 package com.asistencia.ui;
 
 import com.asistencia.model.Usuario;
-import com.asistencia.service.AsistenciaService;
+import com.asistencia.service.WorkerAttendanceOperations;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -21,14 +21,20 @@ import java.awt.GridLayout;
 
 public class WorkerFrame extends JFrame {
     private final Usuario usuario;
-    private final AsistenciaService asistenciaService;
+    private final WorkerAttendanceOperations asistenciaService;
     private final JFrame loginFrame;
+    private final Runnable logoutAction;
     private final JLabel estadoLabel = new JLabel();
 
-    public WorkerFrame(Usuario usuario, AsistenciaService asistenciaService, JFrame loginFrame) {
+    public WorkerFrame(Usuario usuario, WorkerAttendanceOperations asistenciaService, JFrame loginFrame) {
+        this(usuario, asistenciaService, loginFrame, () -> {});
+    }
+
+    public WorkerFrame(Usuario usuario, WorkerAttendanceOperations asistenciaService, JFrame loginFrame, Runnable logoutAction) {
         this.usuario = usuario;
         this.asistenciaService = asistenciaService;
         this.loginFrame = loginFrame;
+        this.logoutAction = logoutAction;
         configureFrame();
         buildContent();
         refreshState();
@@ -146,6 +152,7 @@ public class WorkerFrame extends JFrame {
     }
 
     private void logout() {
+        logoutAction.run();
         dispose();
         loginFrame.setVisible(true);
     }

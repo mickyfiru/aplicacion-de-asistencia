@@ -3,3 +3,5 @@ asistencia.db
 *.db-journal
 *.db-shm
 *.db-wal
+.app-asistencia/
+firebase-auth.properties

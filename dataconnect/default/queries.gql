@@ -1,0 +1,358 @@
+query BuscarUsuarioPorId($id: UUID!) @auth(level: NO_ACCESS) {
+  user(id: $id) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query BuscarUsuarioPorCorreo($correo: String!) @auth(level: NO_ACCESS) {
+  users(where: { correo: { eq: $correo } }, limit: 1) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query BuscarUsuarioPorRut($rut: String!) @auth(level: NO_ACCESS) {
+  users(where: { rut: { eq: $rut } }, limit: 1) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query ListarUsuariosActivos @auth(level: NO_ACCESS) {
+  users(where: { activo: { eq: true } }, orderBy: [{ nombre: ASC }]) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query BuscarUsuarioPorAuthUid($authUid: String!) @auth(level: NO_ACCESS) {
+  users(where: { authUid: { eq: $authUid } }, limit: 1) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query ObtenerAsistenciaPorUsuarioYFecha($usuarioId: UUID!, $fecha: Date!) @auth(level: NO_ACCESS) {
+  asistencia(key: { usuarioId: $usuarioId, fecha: $fecha }) {
+    usuario {
+      id
+      nombre
+      apellido
+      rut
+      correo
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}
+
+query ListarAsistenciasUsuarioPorRango($usuarioId: UUID!, $fechaInicio: Date!, $fechaFin: Date!) @auth(level: NO_ACCESS) {
+  asistencias(
+    where: {
+      usuario: { id: { eq: $usuarioId } }
+      fecha: { ge: $fechaInicio, le: $fechaFin }
+    }
+    orderBy: [{ fecha: ASC }]
+  ) {
+    usuario {
+      id
+      nombre
+      apellido
+      rut
+      correo
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}
+
+query ListarAtrasos($fechaInicio: Date, $fechaFin: Date, $usuarioId: UUID) @auth(level: NO_ACCESS) {
+  asistencias(
+    where: {
+      estadoEntrada: { eq: "ATRASO" }
+      fecha: { ge: $fechaInicio, le: $fechaFin }
+      usuario: { id: { eq: $usuarioId } }
+    }
+    orderBy: [{ fecha: DESC }]
+  ) {
+    usuario {
+      id
+      nombre
+      apellido
+      rut
+      correo
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+  }
+}
+
+query ListarSalidasAnticipadas($fechaInicio: Date, $fechaFin: Date, $usuarioId: UUID) @auth(level: NO_ACCESS) {
+  asistencias(
+    where: {
+      estadoSalida: { eq: "ANTICIPADA" }
+      fecha: { ge: $fechaInicio, le: $fechaFin }
+      usuario: { id: { eq: $usuarioId } }
+    }
+    orderBy: [{ fecha: DESC }]
+  ) {
+    usuario {
+      id
+      nombre
+      apellido
+      rut
+      correo
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+  }
+}
+
+query ObtenerHorarioActivoUsuario($usuarioId: UUID!, $diaSemana: Int!) @auth(level: NO_ACCESS) {
+  horarios(
+    where: {
+      usuario: { id: { eq: $usuarioId } }
+      activo: { eq: true }
+      diasSemana: { includes: $diaSemana }
+    }
+    limit: 1
+  ) {
+    id
+    usuario {
+      id
+      nombre
+      apellido
+      rut
+      correo
+      authUid
+      rol
+      activo
+    }
+    diasSemana
+    horaEntrada
+    horaSalida
+    activo
+  }
+}
+
+query ObtenerAsistenciaBackend($usuarioId: UUID!, $fecha: Date!) @auth(level: NO_ACCESS) {
+  asistencia(key: { usuarioId: $usuarioId, fecha: $fecha }) {
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}
+
+query ObtenerHorarioBackend($usuarioId: UUID!, $diaSemana: Int!) @auth(level: NO_ACCESS) {
+  horarios(
+    where: {
+      usuario: { id: { eq: $usuarioId } }
+      activo: { eq: true }
+      diasSemana: { includes: $diaSemana }
+    }
+    limit: 1
+  ) {
+    id
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    diasSemana
+    horaEntrada
+    horaSalida
+    activo
+  }
+}
+
+query ObtenerMiUsuario @auth(level: USER) {
+  users(where: { authUid: { eq_expr: "auth.uid" } }, limit: 1) {
+    id
+    nombre
+    apellido
+    rut
+    correo
+    authUid
+    rol
+    activo
+    fechaCreacion
+  }
+}
+
+query ObtenerMiHorario($diaSemana: Int!) @auth(level: USER) {
+  horarios(
+    where: {
+      usuario: { authUid: { eq_expr: "auth.uid" } }
+      activo: { eq: true }
+      diasSemana: { includes: $diaSemana }
+    }
+    limit: 1
+  ) {
+    id
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    diasSemana
+    horaEntrada
+    horaSalida
+    activo
+  }
+}
+
+query ObtenerMiAsistenciaActual @auth(level: USER) {
+  asistencias(
+    where: {
+      usuario: { authUid: { eq_expr: "auth.uid" } }
+      horaSalida: { isNull: true }
+    }
+    orderBy: [{ horaEntrada: DESC }]
+    limit: 1
+  ) {
+    id
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}
+
+query ObtenerMiUltimaAsistencia @auth(level: USER) {
+  asistencias(
+    where: {
+      usuario: { authUid: { eq_expr: "auth.uid" } }
+    }
+    orderBy: [{ horaEntrada: DESC }]
+    limit: 1
+  ) {
+    id
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}
+
+query ObtenerMisAsistencias($desde: Timestamp!, $hasta: Timestamp!) @auth(level: USER) {
+  asistencias(
+    where: {
+      usuario: { authUid: { eq_expr: "auth.uid" } }
+      horaEntrada: { ge: $desde, lt: $hasta }
+    }
+    orderBy: [{ horaEntrada: DESC }]
+  ) {
+    id
+    usuario {
+      id
+      authUid
+      rol
+      activo
+    }
+    fecha
+    horaEntrada
+    estadoEntrada
+    minutosAtraso
+    horaSalida
+    estadoSalida
+    minutosSalidaAnticipada
+    observacion
+  }
+}

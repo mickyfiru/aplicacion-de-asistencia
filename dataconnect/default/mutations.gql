@@ -1,0 +1,139 @@
+mutation CrearUsuario(
+  $nombre: String!
+  $apellido: String!
+  $rut: String!
+  $correo: String!
+  $authUid: String!
+  $passwordHash: String!
+  $rol: String!
+) @auth(level: NO_ACCESS) {
+  user_insert(data: {
+    nombre: $nombre
+    apellido: $apellido
+    rut: $rut
+    correo: $correo
+    authUid: $authUid
+    passwordHash: $passwordHash
+    rol: $rol
+    activo: true
+  })
+}
+
+mutation CrearEntradaAsistenciaBackend(
+  $usuarioId: UUID!
+  $fecha: Date!
+) @auth(level: NO_ACCESS) @transaction {
+  query
+    @check(expr: "response.query.asistencia == null", message: "Ya existe una entrada registrada para hoy.")
+    @redact {
+    asistencia(key: { usuarioId: $usuarioId, fecha: $fecha }) {
+      fecha
+    }
+  }
+  asistencia_insert(data: {
+    usuario: { id: $usuarioId }
+    fecha: $fecha
+    estadoEntrada: "PENDIENTE"
+    minutosAtraso: 0
+  })
+}
+
+mutation ActualizarResultadoEntrada(
+  $usuarioId: UUID!
+  $fecha: Date!
+  $estadoEntrada: String!
+  $minutosAtraso: Int!
+) @auth(level: NO_ACCESS) {
+  asistencia_update(
+    key: { usuarioId: $usuarioId, fecha: $fecha }
+    data: {
+      estadoEntrada: $estadoEntrada
+      minutosAtraso: $minutosAtraso
+    }
+  )
+}
+
+mutation MarcarSalidaAsistenciaBackend(
+  $usuarioId: UUID!
+  $fecha: Date!
+) @auth(level: NO_ACCESS) @transaction {
+  query
+    @check(expr: "response.query.asistencia != null && response.query.asistencia.horaSalida == null", message: "No existe entrada pendiente de salida para hoy.")
+    @redact {
+    asistencia(key: { usuarioId: $usuarioId, fecha: $fecha }) {
+      horaSalida
+    }
+  }
+  asistencia_update(
+    key: { usuarioId: $usuarioId, fecha: $fecha }
+    data: {
+      horaSalida_expr: "request.time"
+    }
+  )
+}
+
+mutation ActualizarResultadoSalida(
+  $usuarioId: UUID!
+  $fecha: Date!
+  $estadoSalida: String!
+  $minutosSalidaAnticipada: Int!
+) @auth(level: NO_ACCESS) {
+  asistencia_update(
+    key: { usuarioId: $usuarioId, fecha: $fecha }
+    data: {
+      estadoSalida: $estadoSalida
+      minutosSalidaAnticipada: $minutosSalidaAnticipada
+    }
+  )
+}
+
+mutation MarcarMiEntrada @auth(level: USER) @transaction {
+  query
+    @check(expr: "response.query.users.size() == 1 && response.query.users[0].activo == true && response.query.asistenciasAbiertas.size() == 0", message: "Tu cuenta no puede registrar entrada o ya tiene una asistencia abierta.")
+    @redact {
+    users(where: { authUid: { eq_expr: "auth.uid" } }, limit: 1) {
+      id
+      activo
+    }
+    asistenciasAbiertas: asistencias(
+      where: {
+        usuario: { authUid: { eq_expr: "auth.uid" } }
+        horaSalida: { isNull: true }
+      }
+      limit: 1
+    ) {
+      id
+    }
+  }
+  asistencia_insert(data: {
+    usuario: { id_expr: "response.query.users[0].id" }
+  })
+}
+
+mutation MarcarMiSalida @auth(level: USER) @transaction {
+  query
+    @check(expr: "response.query.users.size() == 1 && response.query.users[0].activo == true && response.query.asistenciasAbiertas.size() == 1", message: "Tu cuenta no puede registrar salida o no tiene una entrada abierta.")
+    @redact {
+    users(where: { authUid: { eq_expr: "auth.uid" } }, limit: 1) {
+      id
+      activo
+    }
+    asistenciasAbiertas: asistencias(
+      where: {
+        usuario: { authUid: { eq_expr: "auth.uid" } }
+        horaSalida: { isNull: true }
+      }
+      orderBy: [{ horaEntrada: DESC }]
+      limit: 1
+    ) {
+      id
+      horaSalida
+    }
+  }
+  asistencia_update(
+    first: { where: { id: { eq_expr: "response.query.asistenciasAbiertas[0].id" } } }
+    data: {
+      horaSalida_expr: "request.time"
+    }
+  )
+}

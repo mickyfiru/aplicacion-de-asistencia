@@ -19,23 +19,24 @@ import javax.swing.border.EmptyBorder;
 
 import com.asistencia.model.Rol;
 import com.asistencia.model.Usuario;
-import com.asistencia.service.AsistenciaService;
-import com.asistencia.service.AuthService; 
+import com.asistencia.exception.AuthenticatedUserNotRegisteredException;
+import com.asistencia.service.LoginService; 
 import com.asistencia.service.ReporteService;
 import com.asistencia.service.UsuarioService; 
+import com.asistencia.service.WorkerAttendanceOperations;
 
 public class LoginFrame extends JFrame {
-    private final AuthService authService; 
+    private final LoginService authService; 
     private final UsuarioService usuarioService; 
-    private final AsistenciaService asistenciaService; 
+    private final WorkerAttendanceOperations asistenciaService; 
     private final ReporteService reporteService; 
     private final JTextField correoField = new JTextField(24); 
     private final JPasswordField passwordField = new JPasswordField(24); 
 
     public LoginFrame(
-            AuthService authService,
+            LoginService authService,
             UsuarioService usuarioService,
-            AsistenciaService asistenciaService,
+            WorkerAttendanceOperations asistenciaService,
             ReporteService reporteService
     ) {
         this.authService = authService; 
@@ -134,15 +135,24 @@ public class LoginFrame extends JFrame {
     private void login() {
         String correo = correoField.getText(); 
         String password = new String(passwordField.getPassword()); 
-        Optional<Usuario> usuario = authService.login(correo, password); 
+        Optional<Usuario> usuario;
+        try {
+            usuario = authService.login(correo, password);
+        } catch (AuthenticatedUserNotRegisteredException exception) {
+            JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        } catch (RuntimeException exception) {
+            JOptionPane.showMessageDialog(this, exception.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         if (usuario.isEmpty()) { 
             JOptionPane.showMessageDialog(this, "Credenciales incorrectas", "Error", JOptionPane.ERROR_MESSAGE); 
             return; 
         }
 
         JFrame nextFrame = usuario.get().getRol() == Rol.ADMINISTRADOR 
-                ? new AdminFrame(usuario.get(), usuarioService, reporteService, this) 
-                : new WorkerFrame(usuario.get(), asistenciaService, this); 
+                ? new AdminFrame(usuario.get(), usuarioService, reporteService, this, authService::logout) 
+                : new WorkerFrame(usuario.get(), asistenciaService, this, authService::logout); 
         clearFields(); 
         setVisible(false); 
         nextFrame.setVisible(true); 

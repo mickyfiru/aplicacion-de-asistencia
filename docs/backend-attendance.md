@@ -29,12 +29,18 @@ Aplicacion Java Desktop
   -> Base de datos administrada
 ```
 
-Datos recibidos para la futura conexion:
+Datos configurados para la futura conexion:
 
-- Proyecto Firebase: `sistema-asistencia-77dcc`
-- Conector: `southamerica-west1/sistema-asistencia-77dcc-service/default`
+- Proyecto Firebase: `app-asistencia`
+- Project ID: `app-asistencia-5e6fe`
+- Servicio SQL/Data Connect: `southamerica-west1/app-asistencia-5e6fe-service`
+- Conector local: `default`
+- Cloud SQL instance: `app-asistencia-5e6fe-instance`
+- Database: `app-asistencia-5e6fe-database`
 
-Todavia no existen en este repositorio `firebase.json`, `dataconnect.yaml`, `connector.yaml`, `schema.gql`, `queries.gql` ni `mutations.gql`. Por eso no se implementan operaciones reales contra Data Connect en esta etapa.
+El repositorio ya contiene configuracion local de Data Connect: `firebase.json`, `.firebaserc`, `dataconnect/dataconnect.yaml`, `dataconnect/schema/schema.gql`, `dataconnect/default/connector.yaml`, `dataconnect/default/queries.gql` y `dataconnect/default/mutations.gql`.
+
+`queries.gql` y `mutations.gql` quedan sin operaciones reales hasta que el equipo defina el contrato de lectura/escritura. No se inventaron queries ni mutations.
 
 ## Hora oficial
 
@@ -114,15 +120,24 @@ La interfaz `UserRepository` prepara:
 
 ## Comando de inicializacion entregado
 
-Ejecutar este comando solo cuando el encargado de base de datos confirme que el schema y las operaciones de Data Connect estan listos para integrarse, idealmente en una rama separada:
+El comando de inicializacion interactiva ya no es necesario para crear la configuracion basica local, porque los archivos fueron creados manualmente apuntando al servicio existente. Si el encargado de base de datos pide regenerar la configuracion oficial con Firebase Tools, ejecutar:
 
 ```powershell
-$env:FIREBASE_PROJECT = 'sistema-asistencia-77dcc';
-$env:FDC_CONNECTOR = 'southamerica-west1/sistema-asistencia-77dcc-service/default';
+$env:FIREBASE_PROJECT = 'app-asistencia-5e6fe';
+$env:FDC_CONNECTOR = 'southamerica-west1/app-asistencia-5e6fe-service/default';
 IEX (New-Object Net.WebClient).DownloadString('https://firebase.tools/init/dataconnect.ps1')
 ```
 
 Despues de ejecutarlo, se deben revisar los archivos generados antes de modificar codigo Java.
+
+Para validar sin desplegar:
+
+```powershell
+firebase dataconnect:compile --project app-asistencia-5e6fe
+firebase dataconnect:sql:diff --project app-asistencia-5e6fe
+```
+
+No ejecutar `firebase deploy` ni `firebase dataconnect:sql:migrate` hasta revisar el diff con el encargado de base de datos.
 
 ## Datos enviados desde frontend
 

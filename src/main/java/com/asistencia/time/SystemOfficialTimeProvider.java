@@ -7,7 +7,7 @@ public class SystemOfficialTimeProvider implements OfficialTimeProvider {
     private final Clock clock;
 
     public SystemOfficialTimeProvider() {
-        this(Clock.systemDefaultZone());
+        this(Clock.system(ChileBusinessCalendar.ZONE));
     }
 
     public SystemOfficialTimeProvider(Clock clock) {

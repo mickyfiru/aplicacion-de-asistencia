@@ -1,16 +1,16 @@
 package com.asistencia.config;
 
 public class FirebaseDataConnectConfig {
-    public static final String DEFAULT_PROJECT_ID = "sistema-asistencia-77dcc";
-    public static final String DEFAULT_CONNECTOR = "southamerica-west1/sistema-asistencia-77dcc-service/default";
+    public static final String DEFAULT_PROJECT_ID = "app-asistencia-5e6fe";
+    public static final String DEFAULT_CONNECTOR = "southamerica-west1/app-asistencia-5e6fe-service/default";
 
     private final String projectId;
     private final String connector;
 
     public FirebaseDataConnectConfig() {
         this(
-                valueOrDefault(System.getenv("FIREBASE_PROJECT"), DEFAULT_PROJECT_ID),
-                valueOrDefault(System.getenv("FDC_CONNECTOR"), DEFAULT_CONNECTOR)
+                valueOrDefault(DEFAULT_PROJECT_ID, "FIREBASE_PROJECT_ID", "FIREBASE_PROJECT"),
+                valueOrDefault(DEFAULT_CONNECTOR, "FIREBASE_DATACONNECT_CONNECTOR_RESOURCE", "FDC_CONNECTOR")
         );
     }
 
@@ -33,7 +33,13 @@ public class FirebaseDataConnectConfig {
         return connector;
     }
 
-    private static String valueOrDefault(String value, String defaultValue) {
-        return value == null || value.isBlank() ? defaultValue : value;
+    private static String valueOrDefault(String defaultValue, String... environmentNames) {
+        for (String environmentName : environmentNames) {
+            String value = System.getenv(environmentName);
+            if (value != null && !value.isBlank()) {
+                return value.trim();
+            }
+        }
+        return defaultValue;
     }
 }

@@ -9,7 +9,7 @@ class FirebaseDataConnectConfigTest {
     void contieneProyectoYConectorEntregadosPorBaseDeDatos() {
         FirebaseDataConnectConfig config = new FirebaseDataConnectConfig();
 
-        assertEquals("sistema-asistencia-77dcc", config.getProjectId());
-        assertEquals("southamerica-west1/sistema-asistencia-77dcc-service/default", config.getConnector());
+        assertEquals("app-asistencia-5e6fe", config.getProjectId());
+        assertEquals("southamerica-west1/app-asistencia-5e6fe-service/default", config.getConnector());
     }
 }
